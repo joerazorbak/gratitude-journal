@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="fr">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <meta name="theme-color" content="#7d8f6a" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <meta name="apple-mobile-web-app-title" content="Mon journal de gratitude" />
+    <title>Mon journal de gratitude</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div id="welcome-screen" class="welcome-screen">
+      <div class="welcome-card">
+        <p class="mini-label">Bienvenue</p>
+        <h2>Comment puis-je t'appeler ?</h2>
+        <form id="welcome-form" class="welcome-form">
+          <input id="user-name" name="userName" type="text" maxlength="40" autocomplete="off" placeholder="Ex. Jonathan" required />
+          <button type="submit">C’est parti</button>
+        </form>
+      </div>
+    </div>
+
+    <div id="app-shell" class="app-shell hidden">
+      <div class="page-shell">
+        <header class="topbar">
+          <div class="topbar-text">
+            <p class="eyebrow">Journal quotidien</p>
+            <h1>Mon journal de gratitude</h1>
+            <div id="user-greeting" class="user-greeting hidden"></div>
+          </div>
+          <div class="topbar-actions">
+            <button id="install-btn" class="small hidden" type="button">Ajouter à l’écran</button>
+          </div>
+        </header>
+
+        <p id="install-note" class="install-note hidden">Sur iPhone/iPad : ouvrez le menu Safari puis “Ajouter à l’écran d’accueil”.</p>
+
+        <main class="layout">
+          <section class="card hero-card">
+            <div class="hero-header">
+              <div>
+                <p class="mini-label">Aujourd’hui</p>
+                <h2>Un petit moment pour soi</h2>
+              </div>
+              <div class="date-pill" id="today-badge">Aujourd’hui</div>
+            </div>
+
+            <p id="daily-prompt" class="daily-prompt"></p>
+
+            <form id="journal-form" class="journal-form">
+              <div class="field-group field-row">
+                <div class="field-wrap">
+                  <label for="entry-date">Date</label>
+                  <input id="entry-date" name="date" type="date" required />
+                </div>
+
+                <div class="field-wrap">
+                  <label for="mood">Humeur</label>
+                  <select id="mood" name="mood">
+                    <option value="joyeux">Joyeux</option>
+                    <option value="heureux">Heureux</option>
+                    <option value="calme">Calme</option>
+                    <option value="serein">Serein</option>
+                    <option value="motivé">Motivé</option>
+                    <option value="optimiste">Optimiste</option>
+                    <option value="fatigué">Fatigué</option>
+                    <option value="stressé">Stressé</option>
+                    <option value="triste">Triste</option>
+                    <option value="anxieux">Anxieux</option>
+                    <option value="épuisé">Épuisé</option>
+                    <option value="énervé">Énervé</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="field-group">
+                <label for="gratitude-1">Ce qui m’a touché</label>
+                <input id="gratitude-1" name="gratitude1" type="text" placeholder="Ex. Une belle conversation avec un ami" required />
+              </div>
+
+              <div class="field-group">
+                <label for="gratitude-2">Le petit plaisir de la journée</label>
+                <input id="gratitude-2" name="gratitude2" type="text" placeholder="Ex. Un moment de calme au travail" required />
+              </div>
+
+              <div class="field-group">
+                <label for="gratitude-3">Ce que je veux garder</label>
+                <input id="gratitude-3" name="gratitude3" type="text" placeholder="Ex. La santé, la présence, la paix" required />
+              </div>
+
+              <div class="field-group">
+                <label for="reflection">Note rapide</label>
+                <textarea id="reflection" name="reflection" rows="4" placeholder="Qu’est-ce qui a rendu cette journée spéciale ?"></textarea>
+              </div>
+
+              <button id="submit-btn" type="submit">Enregistrer ma gratitude</button>
+            </form>
+          </section>
+
+          <aside class="card stats-card">
+            <div class="stats-header">
+              <p class="mini-label">Vue d’ensemble</p>
+              <h2>Mon équilibre</h2>
+            </div>
+
+            <div class="stats-grid">
+              <div class="stat-box">
+                <span class="stat-value" id="entries-count">0</span>
+                <span class="stat-label">entrées</span>
+              </div>
+              <div class="stat-box">
+                <span class="stat-value" id="week-count">0</span>
+                <span class="stat-label">cette semaine</span>
+              </div>
+              <div class="stat-box">
+                <span class="stat-value" id="dominant-mood">—</span>
+                <span class="stat-label">humeur</span>
+              </div>
+              <div class="stat-box">
+                <span class="stat-value" id="streak-count">0</span>
+                <span class="stat-label">consécutifs</span>
+              </div>
+            </div>
+          </aside>
+
+          <section class="card gratitude-card">
+            <div class="section-header">
+              <div>
+                <p class="mini-label">Ce qui compte</p>
+                <h2>Ce pour quoi je suis reconnaissant</h2>
+              </div>
+            </div>
+            <ul id="gratitude-list" class="gratitude-list" aria-live="polite"></ul>
+          </section>
+
+          <section class="card entries-card">
+            <div class="entries-header">
+              <div>
+                <p class="mini-label">Historique</p>
+                <h2>Mes souvenirs de gratitude</h2>
+              </div>
+              <button id="clear-btn" class="secondary" type="button">Effacer</button>
+            </div>
+            <ul id="entries-list" class="entries-list" aria-live="polite"></ul>
+          </section>
+        </main>
+      </div>
+    </div>
+
+    <script src="script.js"></script>
+  </body>
+</html>
