@@ -26,10 +26,10 @@ let deferredPrompt = null;
 let editingEntryIndex = null;
 
 const promptLibrary = [
-  'Réfléchis à ta journée avec ces cinq questions simples : ce qui te rend fier·e, ce que tu as bien fait, les moments positifs, ce qui aurait pu être meilleur et ton objectif pour demain.',
-  'Fais le point sur ta journée avec honnêteté et douceur : ce qui s’est bien passé, ce qui a été positif, et ce que tu veux améliorer demain.',
-  'Prends un moment pour observer ta journée : quelles réussites, quels bienfaits, et quel but te fera avancer demain ?',
-  'Journal quotidien : note ce qui a été bon, ce qui t’a grandi, ce que tu peux améliorer et ce que tu veux viser demain.'
+  'Prends un moment pour noter ton humeur, trois gratitudes, ce qui aurait pu être meilleur et ton but pour demain.',
+  'Journal du jour : note tes trois gratitudes, un petit point d’amélioration et un objectif pour demain.',
+  'Observe ta journée avec bienveillance : ton humeur, trois choses positives, un meilleur angle pour aujourd’hui et un but pour demain.',
+  'Fais le point en douceur : humeur, gratitude, amélioration et prochaine intention.'
 ];
 
 function getStorage() {
@@ -259,20 +259,18 @@ function updateSummary() {
   }
 }
 
+function getEntryGratitudes(entry = {}) {
+  return [
+    entry.gratitude1 ?? entry.proud1 ?? '',
+    entry.gratitude2 ?? entry.proud2 ?? '',
+    entry.gratitude3 ?? entry.proud3 ?? '',
+  ];
+}
+
 function renderGratitudeList() {
   const entries = getEntries();
   const gratitudeItems = entries
-    .flatMap((entry) => [
-      { text: entry.proud1, date: entry.date },
-      { text: entry.proud2, date: entry.date },
-      { text: entry.proud3, date: entry.date },
-      { text: entry.done1, date: entry.date },
-      { text: entry.done2, date: entry.date },
-      { text: entry.done3, date: entry.date },
-      { text: entry.positive1, date: entry.date },
-      { text: entry.positive2, date: entry.date },
-      { text: entry.positive3, date: entry.date },
-    ])
+    .flatMap((entry) => getEntryGratitudes(entry).map((text) => ({ text, date: entry.date })))
     .filter((item) => item.text && item.text.trim());
 
   if (!gratitudeItems.length) {
@@ -317,41 +315,31 @@ function renderEntries() {
 
   entriesList.innerHTML = entries
     .map(
-      (entry, index) => `
-        <li class="entry-item">
-          <h3>Journal du ${formatDate(entry.date)}</h3>
-          <div class="entry-meta">${getMoodLabel(entry.mood || 'heureux')}</div>
+      (entry, index) => {
+        const gratitudes = getEntryGratitudes(entry);
 
-          <div class="entry-section">
-            <strong>1. Fierté</strong>
-            <ul>
-              ${[entry.proud1, entry.proud2, entry.proud3].filter(Boolean).map((item) => `<li>${item}</li>`).join('') || '<li>—</li>'}
-            </ul>
-          </div>
+        return `
+          <li class="entry-item">
+            <h3>Journal du ${formatDate(entry.date)}</h3>
+            <div class="entry-meta">${getMoodLabel(entry.mood || 'heureux')}</div>
 
-          <div class="entry-section">
-            <strong>2. Bien fait</strong>
-            <ul>
-              ${[entry.done1, entry.done2, entry.done3].filter(Boolean).map((item) => `<li>${item}</li>`).join('') || '<li>—</li>'}
-            </ul>
-          </div>
+            <div class="entry-section">
+              <strong>3 gratitudes</strong>
+              <ul>
+                ${gratitudes.filter(Boolean).map((item) => `<li>${item}</li>`).join('') || '<li>—</li>'}
+              </ul>
+            </div>
 
-          <div class="entry-section">
-            <strong>3. Positifs</strong>
-            <ul>
-              ${[entry.positive1, entry.positive2, entry.positive3].filter(Boolean).map((item) => `<li>${item}</li>`).join('') || '<li>—</li>'}
-            </ul>
-          </div>
+            ${entry.improvement ? `<div class="entry-section"><strong>Comment ça aurait pu être meilleur ?</strong><p>${entry.improvement}</p></div>` : ''}
+            ${entry.goal ? `<div class="entry-section"><strong>But pour demain</strong><p>${entry.goal}</p></div>` : ''}
 
-          ${entry.improvement ? `<div class="entry-section"><strong>4. Amélioration</strong><p>${entry.improvement}</p></div>` : ''}
-          ${entry.goal ? `<div class="entry-section"><strong>5. Objectif de demain</strong><p>${entry.goal}</p></div>` : ''}
-
-          <div class="entry-actions">
-            <button type="button" class="edit-btn" data-action="edit" data-index="${index}">Modifier</button>
-            <button type="button" class="delete-btn" data-action="delete" data-index="${index}">Supprimer</button>
-          </div>
-        </li>
-      `
+            <div class="entry-actions">
+              <button type="button" class="edit-btn" data-action="edit" data-index="${index}">Modifier</button>
+              <button type="button" class="delete-btn" data-action="delete" data-index="${index}">Supprimer</button>
+            </div>
+          </li>
+        `;
+      }
     )
     .join('');
 
@@ -374,26 +362,14 @@ function populateFormForEdit(index) {
   }
 
   const mood = document.getElementById('mood');
-  const proud = form.querySelectorAll('[name="proud1"], [name="proud2"], [name="proud3"]');
-  const done = form.querySelectorAll('[name="done1"], [name="done2"], [name="done3"]');
-  const positive = form.querySelectorAll('[name="positive1"], [name="positive2"], [name="positive3"]');
+  const gratitudeInputs = form.querySelectorAll('[name="gratitude1"], [name="gratitude2"], [name="gratitude3"]');
   const improvement = document.getElementById('improvement');
   const goal = document.getElementById('goal');
 
-  const proudValues = [entry.proud1 || '', entry.proud2 || '', entry.proud3 || ''];
-  const doneValues = [entry.done1 || '', entry.done2 || '', entry.done3 || ''];
-  const positiveValues = [entry.positive1 || '', entry.positive2 || '', entry.positive3 || ''];
+  const gratitudeValues = getEntryGratitudes(entry);
 
-  proud.forEach((input, indexValue) => {
-    input.value = proudValues[indexValue] || '';
-  });
-
-  done.forEach((input, indexValue) => {
-    input.value = doneValues[indexValue] || '';
-  });
-
-  positive.forEach((input, indexValue) => {
-    input.value = positiveValues[indexValue] || '';
+  gratitudeInputs.forEach((input, indexValue) => {
+    input.value = gratitudeValues[indexValue] || '';
   });
 
   if (mood) mood.value = entry.mood || 'heureux';
@@ -424,15 +400,9 @@ form.addEventListener('submit', (event) => {
   const newEntry = {
     date: formData.get('date'),
     mood: formData.get('mood') || 'heureux',
-    proud1: formData.get('proud1')?.toString().trim(),
-    proud2: formData.get('proud2')?.toString().trim(),
-    proud3: formData.get('proud3')?.toString().trim(),
-    done1: formData.get('done1')?.toString().trim(),
-    done2: formData.get('done2')?.toString().trim(),
-    done3: formData.get('done3')?.toString().trim(),
-    positive1: formData.get('positive1')?.toString().trim(),
-    positive2: formData.get('positive2')?.toString().trim(),
-    positive3: formData.get('positive3')?.toString().trim(),
+    gratitude1: formData.get('gratitude1')?.toString().trim() || '',
+    gratitude2: formData.get('gratitude2')?.toString().trim() || '',
+    gratitude3: formData.get('gratitude3')?.toString().trim() || '',
     improvement: formData.get('improvement')?.toString().trim() || '',
     goal: formData.get('goal')?.toString().trim() || '',
   };
